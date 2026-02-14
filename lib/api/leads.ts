@@ -8,7 +8,6 @@ import { revalidatePath } from "next/cache";
 export const createNewLead = async (data: Lead) => {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
-    console.log(session)
     if (!userId) return { status: "error", message: "User not found" }
     try {
         const lead = await prisma.lead.create({
@@ -53,8 +52,15 @@ export const updateLeadFollowUpStage = async (data: UpdateLeadFollowUpStage) => 
 }
 
 export const getAllLeads = async () => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
     try {
-        const leads = await prisma.lead.findMany();
+        const leads = await prisma.lead.findMany({
+            where: {
+                createdById: userId,
+            },
+        });
         return { status: "success", data: leads }
     } catch (error) {
         console.log(error)

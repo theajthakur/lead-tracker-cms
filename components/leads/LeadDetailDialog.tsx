@@ -84,12 +84,14 @@ interface LeadDetailDialogProps {
     lead: LeadWithId | null
     open: boolean
     onOpenChange: (open: boolean) => void
+    readonly?: boolean
 }
 
 export default function LeadDetailDialog({
     lead,
     open,
     onOpenChange,
+    readonly = false,
 }: LeadDetailDialogProps) {
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
@@ -197,48 +199,52 @@ export default function LeadDetailDialog({
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 gap-2"
-                                        onClick={() => setIsEditing(true)}
-                                    >
-                                        <Pencil className="h-3.5 w-3.5" />
-                                        <span className="hidden sm:inline">Edit</span>
-                                    </Button>
-
-                                    <Popover>
-                                        <PopoverTrigger asChild>
+                                    {!readonly && (
+                                        <>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                className="h-8 gap-2"
+                                                onClick={() => setIsEditing(true)}
                                             >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                                <span className="hidden sm:inline">Delete</span>
+                                                <Pencil className="h-3.5 w-3.5" />
+                                                <span className="hidden sm:inline">Edit</span>
                                             </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-60" align="end">
-                                            <div className="grid gap-4">
-                                                <div className="space-y-2">
-                                                    <h4 className="font-medium leading-none">Delete Lead?</h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        This action cannot be undone.
-                                                    </p>
-                                                </div>
-                                                <div className="flex justify-end gap-2">
+
+                                            <Popover>
+                                                <PopoverTrigger asChild>
                                                     <Button
-                                                        variant="destructive"
+                                                        variant="outline"
                                                         size="sm"
-                                                        onClick={handleDelete}
-                                                        disabled={isDeleting}
+                                                        className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                     >
-                                                        {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete"}
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        <span className="hidden sm:inline">Delete</span>
                                                     </Button>
-                                                </div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-60" align="end">
+                                                    <div className="grid gap-4">
+                                                        <div className="space-y-2">
+                                                            <h4 className="font-medium leading-none">Delete Lead?</h4>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                This action cannot be undone.
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                onClick={handleDelete}
+                                                                disabled={isDeleting}
+                                                            >
+                                                                {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete"}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </>
+                                    )}
 
                                     <Button
                                         variant="ghost"

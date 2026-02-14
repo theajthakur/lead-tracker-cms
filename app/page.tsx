@@ -125,7 +125,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Performance</CardTitle>
             <CardDescription>
-              Weekly lead conversion metrics.
+              Leads wise Statistics
             </CardDescription>
           </CardHeader>
           <CardContent>
