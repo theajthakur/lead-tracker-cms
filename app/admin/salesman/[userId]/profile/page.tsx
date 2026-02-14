@@ -28,7 +28,7 @@ interface PageProps {
 }
 
 export default async function SalesmanProfilePage({ params }: PageProps) {
-    const { userId } = params;
+    const { userId } = await params;
 
     const analytics = await getLeadsAnalyticsByUserId(userId);
 

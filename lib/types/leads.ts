@@ -33,3 +33,13 @@ export interface LeadWithId extends Lead {
     id: string;
     createdAt: Date;
 }
+
+export interface LeadsAnalytics {
+    totalLeads: number;
+    stage1: number;
+    stage2: number;
+    stage3: number;
+    stage4: number;
+    stage5: number;
+    stage6: number;
+}

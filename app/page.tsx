@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const analytics = await leadsAnalytics();
 
-  const data = "data" in analytics ? analytics.data : {
+  const data = (analytics.status === "success" && "data" in analytics) ? analytics.data : {
     totalLeads: 0,
     stage1: 0,
     stage2: 0,

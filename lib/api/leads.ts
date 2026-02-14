@@ -1,7 +1,7 @@
 "use server"
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma"
-import Lead, { UpdateLeadFollowUpStage } from "@/lib/types/leads"
+import Lead, { UpdateLeadFollowUpStage, LeadsAnalytics } from "@/lib/types/leads"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 
@@ -84,6 +84,12 @@ export const getLeadById = async (id: string) => {
 }
 
 export const getLeadsByUserId = async (userId: string) => {
+    const session = await getServerSession(authOptions)
+
+    if (!session || session.user.role !== "ADMIN") {
+        return { error: "Unauthorized" }
+    }
+    if (!userId) return { error: "User not found" }
     try {
         const leads = await prisma.lead.findMany({
             where: {
@@ -145,14 +151,14 @@ export const updateLeadContent = async (data: Lead) => {
     }
 }
 
-export const leadsAnalytics = async () => {
+export const leadsAnalytics = async (): Promise<{ status: "success"; data: LeadsAnalytics } | { status: "error"; message: string }> => {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     if (!userId) return { status: "error", message: "User not found" }
     return getLeadsAnalyticsByUserId(userId);
 }
 
-export const getLeadsAnalyticsByUserId = async (userId: string) => {
+export const getLeadsAnalyticsByUserId = async (userId: string): Promise<{ status: "success"; data: LeadsAnalytics } | { status: "error"; message: string }> => {
     try {
         const result = await prisma.lead.groupBy({
             by: ["followUpStage"],

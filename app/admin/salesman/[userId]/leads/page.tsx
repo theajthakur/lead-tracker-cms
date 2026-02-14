@@ -4,13 +4,13 @@ import { LEAD_STAGES, LeadWithId } from "@/lib/types/leads";
 import { notFound } from "next/navigation";
 
 interface PageProps {
-    params: {
+    params: Promise<{
         userId: string
-    }
+    }>
 }
 
 export default async function SalesmanLeadsPage({ params }: PageProps) {
-    const { userId } = params;
+    const { userId } = await params;
 
     const { data: leads, error } = await getLeadsByUserId(userId);
 

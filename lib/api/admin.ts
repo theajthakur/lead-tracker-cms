@@ -6,6 +6,7 @@ import { randomBytes } from "crypto"
 
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { revalidatePath } from "next/cache"
 import { Role } from "@/generated/prisma/enums"
 
 export async function getSalesmen() {
@@ -174,11 +175,19 @@ export const deleteUser = async (userId: string) => {
     }
 
     try {
+        // Delete all leads created by this user first
+        await prisma.lead.deleteMany({
+            where: {
+                createdById: userId,
+            },
+        })
+
         const user = await prisma.user.delete({
             where: {
                 id: userId,
             },
         })
+        revalidatePath("/admin/salesman")
         return { success: true, data: user }
     } catch (error) {
         console.error("Error deleting user:", error)

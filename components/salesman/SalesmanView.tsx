@@ -20,6 +20,19 @@ import {
 } from "@/components/ui/table"
 import CreateSalesmanDialog from "./CreateSalesmanDialog"
 import SalesmanDetailsDialog from "./SalesmanDetailsDialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { deleteUser } from "@/lib/api/admin"
+import { toast } from "sonner"
+import { Trash2 } from "lucide-react"
 
 interface Salesman {
     id: string
@@ -41,6 +54,29 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedSalesmanId, setSelectedSalesmanId] = useState<string | null>(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [salesmanToDelete, setSalesmanToDelete] = useState<string | null>(null)
+
+    const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation()
+        setSalesmanToDelete(id)
+        setDeleteDialogOpen(true)
+    }
+
+    const confirmDelete = async () => {
+        if (!salesmanToDelete) return
+
+        const res = await deleteUser(salesmanToDelete)
+
+        if (res.error) {
+            toast.error(res.error)
+        } else {
+            toast.success("Salesman deleted successfully")
+            setSalesmen((prev) => prev.filter((s) => s.id !== salesmanToDelete))
+        }
+        setDeleteDialogOpen(false)
+        setSalesmanToDelete(null)
+    }
 
     const filteredSalesmen = salesmen.filter(
         (s) =>
@@ -112,6 +148,7 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
                                 <TableHead>Status</TableHead>
                                 <TableHead>Joined</TableHead>
                                 <TableHead className="text-right">Leads Assigned</TableHead>
+                                <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -147,6 +184,16 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
                                     <TableCell className="text-right font-medium">
                                         {salesman._count.leads}
                                     </TableCell>
+                                    <TableCell>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                            onClick={(e) => handleDeleteClick(e, salesman.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                             {filteredSalesmen.length === 0 && (
@@ -166,6 +213,24 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
                 open={isDetailsOpen}
                 onOpenChange={setIsDetailsOpen}
             />
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the salesman account and remove their data from our servers.
+                            All leads assigned to this user will also be deleted.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
