@@ -1,6 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { toast } from "sonner"
+
 import {
     Dialog,
     DialogContent,
@@ -9,11 +16,69 @@ import {
     DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+
+import {
+    X,
+    Mail,
+    Phone,
+    Calendar,
+    Hash,
+    Globe,
+    Trash2,
+    Pencil,
+    Save,
+    Undo,
+    Loader2
+} from "lucide-react"
+
 import { LeadWithId } from "@/lib/types/leads"
-import { Mail, Phone, Calendar, Hash, Globe } from "lucide-react"
+import { deleteLead, updateLeadContent } from "@/lib/api/leads"
+
+const leadSchema = z.object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    email: z.string().email({ message: "Invalid email address." }),
+    mobile: z.string().min(10, { message: "Mobile number must be at least 10 digits." }),
+    description: z.string().optional(),
+    source: z.enum([
+        "FACEBOOK",
+        "INSTAGRAM",
+        "GOOGLE",
+        "TIKTOK",
+        "WHATSAPP",
+        "LINKEDIN",
+        "TWITTER",
+        "YOUTUBE",
+        "OTHER"
+    ], {
+        required_error: "Please select a source.",
+    }),
+})
+
+type LeadFormValues = z.infer<typeof leadSchema>
 
 interface LeadDetailDialogProps {
     lead: LeadWithId | null
@@ -26,6 +91,43 @@ export default function LeadDetailDialog({
     open,
     onOpenChange,
 }: LeadDetailDialogProps) {
+    const router = useRouter()
+    const [isEditing, setIsEditing] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    // Reset editing state when dialog closes or lead changes
+    useEffect(() => {
+        if (!open) {
+            setIsEditing(false)
+        }
+    }, [open])
+
+    const form = useForm<LeadFormValues>({
+        resolver: zodResolver(leadSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            mobile: "",
+            description: "",
+            source: "OTHER",
+        },
+    })
+
+    // Update form values when lead changes
+    useEffect(() => {
+        if (lead) {
+            form.reset({
+                name: lead.name,
+                email: lead.email,
+                mobile: lead.mobile,
+                description: lead.description || "",
+                // @ts-ignore - Assuming source matches enum, fallback to OTHER if not
+                source: lead.source as any || "OTHER",
+            })
+        }
+    }, [lead, form])
+
     if (!lead) return null
 
     const stageMap = {
@@ -36,67 +138,261 @@ export default function LeadDetailDialog({
 
     const stage = stageMap[lead.followUpStage as 1 | 2 | 3]
 
+    const handleDelete = async () => {
+        setIsDeleting(true)
+        const result = await deleteLead(lead.id)
+        setIsDeleting(false)
+
+        if (result.status === "success") {
+            toast.success(result.message)
+            onOpenChange(false)
+            router.refresh()
+        } else {
+            toast.error(result.message)
+        }
+    }
+
+    const onSave = async (data: LeadFormValues) => {
+        setIsLoading(true)
+        const payload = {
+            ...lead, // Keep existing ID and stage
+            ...data,
+            description: data.description || "",
+        }
+
+        const result = await updateLeadContent(payload)
+        setIsLoading(false)
+
+        if (result.status === "success") {
+            toast.success(result.message)
+            setIsEditing(false)
+            router.refresh()
+        } else {
+            toast.error(result.message)
+        }
+    }
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-[95vw] max-w-xl p-0 overflow-hidden rounded-2xl" showCloseButton={false}>
 
                 {/* Header */}
-                <div className="px-8 py-6 border-b bg-gradient-to-b from-muted/40 to-background relative">
-                    <DialogClose className="absolute top-1 right-1 opacity-70 hover:opacity-100 transition-opacity" asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </DialogClose>
-                    <DialogHeader className="space-y-3">
+                <div className="px-8 py-6 border-b bg-linear-to-b from-muted/40 to-background relative">
+                    <div className="absolute top-4 right-4 flex items-center gap-2">
+                        {!isEditing && (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60">
+                                        <div className="grid gap-4">
+                                            <div className="space-y-2">
+                                                <h4 className="font-medium leading-none">Delete Lead?</h4>
+                                                <p className="text-sm text-muted-foreground">
+                                                    This action cannot be undone.
+                                                </p>
+                                            </div>
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={handleDelete}
+                                                    disabled={isDeleting}
+                                                >
+                                                    {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete"}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            </>
+                        )}
+
+                        {isEditing && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                onClick={() => setIsEditing(false)}
+                            >
+                                <Undo className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        <DialogClose asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-70 hover:opacity-100">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </DialogClose>
+                    </div>
+
+                    <DialogHeader className="space-y-3 pr-20"> {/* pr-20 to avoid overlap with buttons */}
                         <div className="flex items-center justify-between">
-                            <DialogTitle className="text-2xl font-semibold tracking-tight">
-                                {lead.name}
+                            <DialogTitle className="text-2xl font-semibold tracking-tight truncate">
+                                {isEditing ? "Edit Lead" : lead.name}
                             </DialogTitle>
-
-                            <Badge className={`px-3 py-1 text-xs font-medium ${stage.color}`}>
-                                {stage.label}
-                            </Badge>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            Created{" "}
-                            {lead.createdAt
-                                ? format(new Date(lead.createdAt), "PPP")
-                                : "Unknown"}
-                        </div>
+                        {!isEditing && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                Created{" "}
+                                {lead.createdAt
+                                    ? format(new Date(lead.createdAt), "PPP")
+                                    : "Unknown"}
+                            </div>
+                        )}
                     </DialogHeader>
                 </div>
 
                 {/* Body */}
-                <div className="px-8 py-6 space-y-8 max-h-[60vh] overflow-y-auto">
+                <div className="px-8 py-6 max-h-[60vh] overflow-y-auto">
+                    {isEditing ? (
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Name</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="John Doe" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="john@example.com" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="mobile"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Mobile</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="+1234567890" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="source"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Source</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a source" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="FACEBOOK">Facebook</SelectItem>
+                                                        <SelectItem value="INSTAGRAM">Instagram</SelectItem>
+                                                        <SelectItem value="GOOGLE">Google</SelectItem>
+                                                        <SelectItem value="TIKTOK">TikTok</SelectItem>
+                                                        <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                                                        <SelectItem value="LINKEDIN">LinkedIn</SelectItem>
+                                                        <SelectItem value="TWITTER">Twitter</SelectItem>
+                                                        <SelectItem value="YOUTUBE">YouTube</SelectItem>
+                                                        <SelectItem value="OTHER">Other</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Description</FormLabel>
+                                            <FormControl>
+                                                <Textarea placeholder="Any additional details..." {...field} className="min-h-[100px]" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex justify-end pt-4">
+                                    <Button type="submit" disabled={isLoading}>
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="mr-2 h-4 w-4" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    ) : (
+                        <div className="space-y-8">
+                            {/* Info Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <InfoCard icon={<Mail className="w-4 h-4" />} label="Email" value={lead.email} />
+                                <InfoCard icon={<Phone className="w-4 h-4" />} label="Mobile" value={lead.mobile} />
+                                <InfoCard icon={<Globe className="w-4 h-4" />} label="Source" value={lead.source} />
+                                <InfoCard icon={<Hash className="w-4 h-4" />} label="Lead ID" value={lead.id} mono />
+                            </div>
 
-                    {/* Info Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <Separator />
 
-                        <InfoCard icon={<Mail />} label="Email" value={lead.email} />
-                        <InfoCard icon={<Phone />} label="Mobile" value={lead.mobile} />
-                        <InfoCard icon={<Globe />} label="Source" value={lead.source} />
-                        <InfoCard icon={<Hash />} label="Lead ID" value={lead.id} mono />
+                            {/* Description */}
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                                    Description
+                                </h3>
 
-                    </div>
-
-                    <Separator />
-
-                    {/* Description */}
-                    <div className="space-y-3">
-                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                            Description
-                        </h3>
-
-                        <div className="rounded-xl border bg-muted/30 p-5 text-sm leading-relaxed whitespace-pre-wrap min-h-[120px] break-all">
-                            {lead.description || (
-                                <span className="italic text-muted-foreground">
-                                    No description provided.
-                                </span>
-                            )}
+                                <div className="rounded-xl border bg-muted/30 p-5 text-sm leading-relaxed whitespace-pre-wrap min-h-[120px] break-all">
+                                    {lead.description || (
+                                        <span className="italic text-muted-foreground">
+                                            No description provided.
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
@@ -116,14 +412,14 @@ function InfoCard({
     mono?: boolean
 }) {
     return (
-        <div className="rounded-xl border bg-background p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                <span className="h-4 w-4">{icon}</span>
-                {label}
+        <div className="rounded-xl flex flex-col border bg-background p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2">
+                {icon}
+                <p className="text-xs">{label}</p>
             </div>
 
             <div
-                className={`text-sm font-medium break-all ${mono ? "font-mono text-xs" : ""
+                className={`text-xs mt-2  font-medium break-all ${mono ? "font-mono text-xs" : ""
                     }`}
             >
                 {value || (

@@ -1,4 +1,5 @@
 export default interface Lead {
+    id?: string,
     name: string,
     email: string,
     mobile: string,
@@ -13,6 +14,7 @@ export interface UpdateLeadFollowUpStage {
     followUpStage: FollowUpStage,
     createdById?: string,
 }
+
 
 export type FollowUpStage = 1 | 2 | 3
 

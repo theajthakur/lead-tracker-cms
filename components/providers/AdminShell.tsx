@@ -45,12 +45,12 @@ export function AdminShell({ children }: AdminShellProps) {
     }
 
     return (
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+        <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] overflow-hidden">
             <div className="hidden border-r bg-muted/40 md:block">
-                <SidebarContent pathname={pathname} />
+                <SidebarContent pathname={pathname} user={session?.user} />
             </div>
-            <div className="flex flex-col">
-                <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden">
+            <div className="flex flex-col h-full overflow-hidden">
+                <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden shrink-0">
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
                             <Button
@@ -63,14 +63,14 @@ export function AdminShell({ children }: AdminShellProps) {
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col p-0 w-64">
-                            <SidebarContent pathname={pathname} setOpen={setOpen} />
+                            <SidebarContent pathname={pathname} setOpen={setOpen} user={session?.user} />
                         </SheetContent>
                     </Sheet>
                     <div className="w-full flex-1">
                         <span className="font-semibold">Admin Panel</span>
                     </div>
                 </header>
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto">
                     {children}
                 </main>
             </div>
@@ -91,12 +91,27 @@ const navItems = [
     },
 ]
 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronsUpDown, User } from "lucide-react"
+
 interface SidebarContentProps {
     pathname: string | null
     setOpen?: (open: boolean) => void
+    user?: {
+        name?: string | null
+        email?: string | null
+        image?: string | null
+    }
 }
 
-function SidebarContent({ pathname, setOpen }: SidebarContentProps) {
+function SidebarContent({ pathname, setOpen, user }: SidebarContentProps) {
     return (
         <div className="flex h-full flex-col gap-4">
             <div className="flex h-14 items-center border-b px-6 font-semibold lg:h-[60px]">
@@ -123,14 +138,41 @@ function SidebarContent({ pathname, setOpen }: SidebarContentProps) {
                 </nav>
             </div>
             <div className="border-t p-4">
-                <Button
-                    variant="outline"
-                    className="w-full justify-start gap-3"
-                    onClick={() => signOut()}
-                >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-start px-2 h-14 hover:bg-muted/50">
+                            <div className="flex items-center gap-3 w-full">
+                                <div className="h-8 w-8 rounded-full bg-muted border flex items-center justify-center shrink-0">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <div className="flex flex-col items-start text-left overflow-hidden flex-1">
+                                    <span className="text-sm font-medium truncate w-full">
+                                        {user?.name || "User"}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground truncate w-full">
+                                        {user?.email || "user@example.com"}
+                                    </span>
+                                </div>
+                                <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground opacity-50" />
+                            </div>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
+                                <p className="text-xs leading-none text-muted-foreground">
+                                    {user?.email || "user@example.com"}
+                                </p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => signOut()}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Log out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
     )

@@ -89,3 +89,84 @@ export const getLeadsByUserId = async (userId: string) => {
         return { status: "error", message: "Failed to fetch leads" }
     }
 }
+
+export const deleteLead = async (id: string) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
+    try {
+        const lead = await prisma.lead.delete({
+            where: {
+                id: id,
+                createdById: userId,
+            },
+        });
+        revalidatePath("/leads")
+        return { status: "success", message: "Lead deleted successfully" }
+    } catch (error) {
+        console.log(error)
+        return { status: "error", message: "Lead deletion failed" }
+    }
+}
+
+export const updateLeadContent = async (data: Lead) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
+    if (!data.id) return { status: "error", message: "Lead ID is required" }
+    try {
+        const lead = await prisma.lead.update({
+            where: {
+                id: data.id,
+                createdById: userId,
+            },
+            data: {
+                name: data.name,
+                email: data.email,
+                mobile: data.mobile,
+                description: data.description,
+                source: data.source,
+                followUpStage: data.followUpStage,
+            },
+        });
+        revalidatePath("/leads")
+        return { status: "success", message: "Lead updated successfully" }
+    } catch (error) {
+        console.log(error)
+        return { status: "error", message: "Lead update failed" }
+    }
+}
+
+export const leadsAnalytics = async () => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
+    try {
+        const result = await prisma.lead.groupBy({
+            by: ["followUpStage"],
+            _count: {
+                followUpStage: true,
+            },
+            where: { createdById: userId },
+        });
+        const stats = {
+            totalLeads: 0,
+            stage1: 0,
+            stage2: 0,
+            stage3: 0,
+        };
+
+        result.forEach(item => {
+            stats.totalLeads += item._count.followUpStage;
+
+            if (item.followUpStage === 1) stats.stage1 = item._count.followUpStage;
+            if (item.followUpStage === 2) stats.stage2 = item._count.followUpStage;
+            if (item.followUpStage === 3) stats.stage3 = item._count.followUpStage;
+        });
+
+        return { status: "success", data: stats }
+    } catch (error) {
+        console.log(error)
+        return { status: "error", message: "Failed to fetch leads" }
+    }
+}

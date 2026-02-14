@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Card,
   CardContent,
@@ -7,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { leadsAnalytics } from "@/lib/api/leads"
 import {
   Users,
   UserPlus,
@@ -15,34 +14,41 @@ import {
   TrendingUp,
 } from "lucide-react"
 
-export default function DashboardPage() {
-  // Mock data for the dashboard
+export default async function DashboardPage() {
+  const analytics = await leadsAnalytics()
+  const data = analytics.data || {
+    totalLeads: 0,
+    stage1: 0,
+    stage2: 0,
+    stage3: 0,
+  }
+
   const stats = [
     {
       title: "Total Leads",
-      value: "1,248",
-      description: "+180 from last month",
+      value: data.totalLeads.toString(),
+      description: "All time leads",
       icon: Users,
     },
     {
       title: "New Leads",
-      value: "45",
-      description: "+12 since last week",
+      value: data.stage1.toString(),
+      description: "Leads in NEW stage",
       icon: UserPlus,
     },
     {
       title: "Pending Follow-ups",
-      value: "12",
-      description: "Requires attention",
+      value: data.stage2.toString(),
+      description: "Leads in PENDING stage",
       icon: Clock,
     },
     {
       title: "Converted",
-      value: "284",
-      description: "+8% conversion rate",
+      value: data.stage3.toString(),
+      description: "Leads in FINISHED stage",
       icon: CheckCircle2,
     },
-  ]
+  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,23 +87,8 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-8">
-              {/* Mock Recent Activity Items */}
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      Called Lead #{100 + i}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {i * 15} minutes ago
-                    </p>
-                  </div>
-                  <div className="ml-auto font-medium">
-                    Called
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+              <p>No recent activity to show.</p>
             </div>
           </CardContent>
         </Card>

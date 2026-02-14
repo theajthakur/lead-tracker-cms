@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -67,6 +68,7 @@ type LeadFormValues = z.infer<typeof leadSchema>
 
 export function CreateLeadDialog() {
     const [open, setOpen] = useState(false)
+    const router = useRouter()
 
     const form = useForm<LeadFormValues>({
         resolver: zodResolver(leadSchema),
@@ -97,6 +99,7 @@ export function CreateLeadDialog() {
             toast.success(result.message)
             setOpen(false)
             form.reset()
+            router.refresh()
         } else {
             toast.error(result.message)
         }
