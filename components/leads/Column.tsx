@@ -3,7 +3,17 @@ import { Badge } from '../ui/badge'
 import LeadCard from './Lead'
 import { Separator } from '../ui/separator'
 
-export default function Column({ partition, title }: { partition: any, title: string }) {
+import { LeadWithId } from "@/lib/types/leads";
+
+export default function Column({
+    partition,
+    title,
+    onLeadClick,
+}: {
+    partition: LeadWithId[];
+    title: string;
+    onLeadClick: (lead: LeadWithId) => void;
+}) {
     return (
         <div className="flex flex-col gap-4 h-full bg-muted/30 p-2">
             <div className="flex items-center justify-between">
@@ -12,8 +22,8 @@ export default function Column({ partition, title }: { partition: any, title: st
             </div>
             <Separator />
             <div className="flex flex-col gap-3 overflow-y-auto pr-2">
-                {partition.map((lead: any) => (
-                    <LeadCard key={lead.id} lead={lead} />
+                {partition.map((lead) => (
+                    <LeadCard key={lead.id} lead={lead} onClick={() => onLeadClick(lead)} />
                 ))}
                 {partition.length === 0 && (
                     <div className="text-center text-muted-foreground text-sm py-4">No {title.toLocaleLowerCase()} leads</div>

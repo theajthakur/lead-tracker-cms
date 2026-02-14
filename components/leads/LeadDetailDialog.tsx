@@ -4,10 +4,12 @@ import { format } from "date-fns"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { LeadWithId } from "@/lib/types/leads"
@@ -19,81 +21,117 @@ interface LeadDetailDialogProps {
     onOpenChange: (open: boolean) => void
 }
 
-export default function LeadDetailDialog({ lead, open, onOpenChange }: LeadDetailDialogProps) {
+export default function LeadDetailDialog({
+    lead,
+    open,
+    onOpenChange,
+}: LeadDetailDialogProps) {
     if (!lead) return null
+
+    const stageMap = {
+        1: { label: "New", color: "bg-primary/10 text-primary" },
+        2: { label: "Pending", color: "bg-yellow-500/10 text-yellow-600" },
+        3: { label: "Finished", color: "bg-green-500/10 text-green-600" },
+    }
+
+    const stage = stageMap[lead.followUpStage as 1 | 2 | 3]
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden gap-0">
-                <div className="px-6 pt-6 pb-4 bg-muted/30 border-b">
-                    <DialogHeader>
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex flex-col gap-1">
-                                <DialogTitle className="text-2xl font-bold">{lead.name}</DialogTitle>
-                                <DialogDescription className="flex items-center gap-2">
-                                    <Calendar className="h-3.5 w-3.5" />
-                                    Created on {lead.createdAt ? format(new Date(lead.createdAt), "PPP") : "Unknown date"}
-                                </DialogDescription>
-                            </div>
-                            <Badge
-                                variant={lead.followUpStage === 3 ? "default" : lead.followUpStage === 2 ? "secondary" : "outline"}
-                                className="px-3 py-1 text-sm capitalize"
-                            >
-                                {lead.followUpStage === 1 && "New"}
-                                {lead.followUpStage === 2 && "Pending"}
-                                {lead.followUpStage === 3 && "Finished"}
+            <DialogContent className="w-[95vw] max-w-xl p-0 overflow-hidden rounded-2xl" showCloseButton={false}>
+
+                {/* Header */}
+                <div className="px-8 py-6 border-b bg-gradient-to-b from-muted/40 to-background relative">
+                    <DialogClose className="absolute top-1 right-1 opacity-70 hover:opacity-100 transition-opacity" asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </DialogClose>
+                    <DialogHeader className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <DialogTitle className="text-2xl font-semibold tracking-tight">
+                                {lead.name}
+                            </DialogTitle>
+
+                            <Badge className={`px-3 py-1 text-xs font-medium ${stage.color}`}>
+                                {stage.label}
                             </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            Created{" "}
+                            {lead.createdAt
+                                ? format(new Date(lead.createdAt), "PPP")
+                                : "Unknown"}
                         </div>
                     </DialogHeader>
                 </div>
 
-                <div className="p-6 flex flex-col gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex flex-col gap-1.5 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <Mail className="h-4 w-4" /> Email
-                            </span>
-                            <span className="text-base font-medium truncate" title={lead.email}>{lead.email}</span>
-                        </div>
+                {/* Body */}
+                <div className="px-8 py-6 space-y-8 max-h-[60vh] overflow-y-auto">
 
-                        <div className="flex flex-col gap-1.5 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <Phone className="h-4 w-4" /> Mobile
-                            </span>
-                            <span className="text-base font-medium">{lead.mobile}</span>
-                        </div>
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        <div className="flex flex-col gap-1.5 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <Globe className="h-4 w-4" /> Source
-                            </span>
-                            <div className="flex">
-                                <Badge variant="outline" className="font-normal">
-                                    {lead.source}
-                                </Badge>
-                            </div>
-                        </div>
+                        <InfoCard icon={<Mail />} label="Email" value={lead.email} />
+                        <InfoCard icon={<Phone />} label="Mobile" value={lead.mobile} />
+                        <InfoCard icon={<Globe />} label="Source" value={lead.source} />
+                        <InfoCard icon={<Hash />} label="Lead ID" value={lead.id} mono />
 
-                        <div className="flex flex-col gap-1.5 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <Hash className="h-4 w-4" /> Lead ID
-                            </span>
-                            <span className="text-xs font-mono text-muted-foreground truncate" title={lead.id}>
-                                {lead.id}
-                            </span>
-                        </div>
                     </div>
 
                     <Separator />
 
-                    <div className="flex flex-col gap-3">
-                        <span className="text-sm font-medium text-muted-foreground">Description</span>
-                        <div className="bg-muted/30 p-4 rounded-lg border text-sm leading-relaxed whitespace-pre-wrap min-h-[100px]">
-                            {lead.description || <span className="text-muted-foreground italic">No description provided.</span>}
+                    {/* Description */}
+                    <div className="space-y-3">
+                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                            Description
+                        </h3>
+
+                        <div className="rounded-xl border bg-muted/30 p-5 text-sm leading-relaxed whitespace-pre-wrap min-h-[120px] break-all">
+                            {lead.description || (
+                                <span className="italic text-muted-foreground">
+                                    No description provided.
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
             </DialogContent>
         </Dialog>
+    )
+}
+
+/* Reusable Info Card */
+function InfoCard({
+    icon,
+    label,
+    value,
+    mono,
+}: {
+    icon: React.ReactNode
+    label: string
+    value?: string | null
+    mono?: boolean
+}) {
+    return (
+        <div className="rounded-xl border bg-background p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                <span className="h-4 w-4">{icon}</span>
+                {label}
+            </div>
+
+            <div
+                className={`text-sm font-medium break-all ${mono ? "font-mono text-xs" : ""
+                    }`}
+            >
+                {value || (
+                    <span className="italic text-muted-foreground">
+                        Not provided
+                    </span>
+                )}
+            </div>
+        </div>
     )
 }

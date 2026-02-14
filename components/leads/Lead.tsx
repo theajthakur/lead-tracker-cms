@@ -1,9 +1,12 @@
 import { LeadWithId } from "@/lib/types/leads"
 import { Card, CardContent } from "../ui/card"
 import { Badge } from "../ui/badge"
-export default function LeadCard({ lead }: { lead: LeadWithId }) {
+export default function LeadCard({ lead, onClick }: { lead: LeadWithId; onClick: () => void }) {
     return (
-        <Card className="hover:shadow-md transition-shadow overflow-hidden">
+        <Card
+            className="hover:shadow-md py-0 transition-shadow overflow-hidden cursor-pointer"
+            onClick={onClick}
+        >
             <CardContent className="p-4 flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                     <span className="font-medium line-clamp-1">{lead.name}</span>
