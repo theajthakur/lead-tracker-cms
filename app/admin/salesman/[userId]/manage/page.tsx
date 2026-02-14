@@ -24,7 +24,7 @@ export default async function ManageSalesmanPage({ params }: PageProps) {
                     Perform administrative actions for this user account.
                 </p>
             </div>
-            <ManageSalesmanView userId={user.id} userEmail={user.email} />
+            <ManageSalesmanView userId={user.id} userEmail={user.email} currentStatus={user.status} />
         </div>
     );
 }

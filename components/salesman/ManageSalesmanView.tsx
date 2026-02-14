@@ -14,17 +14,20 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteUser, resetPassword } from "@/lib/api/admin"
+import { deleteUser, resetPassword, enableUser, disableUser } from "@/lib/api/admin"
 import { toast } from "sonner"
-import { Loader2, Trash2, KeyRound, Copy, Check } from "lucide-react"
+import { Loader2, Trash2, KeyRound, Copy, Check, Ban, CheckCircle } from "lucide-react"
 
 interface ManageSalesmanViewProps {
     userId: string
     userEmail: string
+    currentStatus: string
 }
 
-export default function ManageSalesmanView({ userId, userEmail }: ManageSalesmanViewProps) {
+export default function ManageSalesmanView({ userId, userEmail, currentStatus }: ManageSalesmanViewProps) {
     const router = useRouter()
+    const [status, setStatus] = useState(currentStatus)
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [isResetting, setIsResetting] = useState(false)
@@ -72,6 +75,30 @@ export default function ManageSalesmanView({ userId, userEmail }: ManageSalesman
         toast.success("Credentials copied to clipboard")
     }
 
+    const handleToggleStatus = async () => {
+        setIsUpdatingStatus(true)
+        if (status === "ACTIVE") {
+            const res = await disableUser(userId)
+            if (res.error) {
+                toast.error(res.error)
+            } else {
+                setStatus("DISABLED")
+                toast.success("User disabled successfully")
+                router.refresh()
+            }
+        } else {
+            const res = await enableUser(userId)
+            if (res.error) {
+                toast.error(res.error)
+            } else {
+                setStatus("ACTIVE")
+                toast.success("User enabled successfully")
+                router.refresh()
+            }
+        }
+        setIsUpdatingStatus(false)
+    }
+
     return (
         <div className="space-y-6 max-w-2xl">
             <Card>
@@ -90,6 +117,47 @@ export default function ManageSalesmanView({ userId, userEmail }: ManageSalesman
                         <Button variant="outline" onClick={handleResetPassword} disabled={isResetting}>
                             {isResetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
                             Reset Password
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Account Status</CardTitle>
+                    <CardDescription>Enable or disable this user's access to the platform.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <p className="font-medium">Current Status</p>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status === "ACTIVE"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                    }`}>
+                                    {status}
+                                </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {status === "ACTIVE"
+                                    ? "User has full access to the system."
+                                    : "User is blocked from accessing the system."}
+                            </p>
+                        </div>
+                        <Button
+                            variant={status === "ACTIVE" ? "destructive" : "default"}
+                            onClick={handleToggleStatus}
+                            disabled={isUpdatingStatus}
+                        >
+                            {isUpdatingStatus ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : status === "ACTIVE" ? (
+                                <Ban className="mr-2 h-4 w-4" />
+                            ) : (
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                            )}
+                            {status === "ACTIVE" ? "Disable User" : "Enable User"}
                         </Button>
                     </div>
                 </CardContent>
