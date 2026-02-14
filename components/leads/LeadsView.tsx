@@ -29,6 +29,7 @@ import LeadCard from "./Lead";
 interface LeadsViewProps {
     partitions: Record<string, LeadWithId[]>;
     labels: string[] | readonly string[];
+    readOnly?: boolean;
 }
 
 const dropAnimation: DropAnimation = {
@@ -41,7 +42,7 @@ const dropAnimation: DropAnimation = {
     }),
 };
 
-export default function LeadsView({ partitions, labels }: { partitions: Record<string, LeadWithId[]>, labels: string[] | readonly string[] }) {
+export default function LeadsView({ partitions, labels, readOnly = false }: LeadsViewProps) {
     const [leads, setLeads] = useState(partitions);
     const [selectedLead, setSelectedLead] = useState<LeadWithId | null>(null);
 
@@ -91,6 +92,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
     };
 
     const handleDragStart = (event: DragStartEvent) => {
+        if (readOnly) return;
         const { active } = event;
         const id = active.id as string;
         const container = findContainer(id);
@@ -101,6 +103,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
     };
 
     const handleDragOver = (event: DragOverEvent) => {
+        if (readOnly) return;
         const { active, over } = event;
         const overId = over?.id;
 
@@ -155,6 +158,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
     };
 
     const handleDragEnd = async (event: DragEndEvent) => {
+        if (readOnly) return;
         const { active, over } = event;
         const activeContainer = findContainer(active.id as string);
         const overContainer = over ? findContainer(over.id as string) : null;
@@ -204,7 +208,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
 
     return (
         <DndContext
-            sensors={sensors}
+            sensors={readOnly ? [] : sensors}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
@@ -227,6 +231,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
                 lead={selectedLead}
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
+                readonly={readOnly}
             />
         </DndContext>
     );

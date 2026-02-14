@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 import { useState } from "react"
 import { Plus, Search, User, Mail, Calendar, Shield } from "lucide-react"
 import { format } from "date-fns"
@@ -62,9 +64,10 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
         setSalesmen((prev) => [salesman, ...prev])
     }
 
+    const router = useRouter()
+
     const handleRowClick = (id: string) => {
-        setSelectedSalesmanId(id)
-        setIsDetailsOpen(true)
+        router.push(`/admin/salesman/${id}/profile`)
     }
 
     return (

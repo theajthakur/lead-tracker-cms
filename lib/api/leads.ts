@@ -90,7 +90,7 @@ export const getLeadsByUserId = async (userId: string) => {
                 createdById: userId,
             },
         });
-        return { status: "success", data: leads }
+        return { status: "success", data: leads, error: null }
     } catch (error) {
         console.log(error)
         return { status: "error", message: "Failed to fetch leads" }
@@ -149,6 +149,10 @@ export const leadsAnalytics = async () => {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     if (!userId) return { status: "error", message: "User not found" }
+    return getLeadsAnalyticsByUserId(userId);
+}
+
+export const getLeadsAnalyticsByUserId = async (userId: string) => {
     try {
         const result = await prisma.lead.groupBy({
             by: ["followUpStage"],
@@ -181,7 +185,7 @@ export const leadsAnalytics = async () => {
         return { status: "success", data: stats }
     } catch (error) {
         console.log(error)
-        return { status: "error", message: "Failed to fetch leads" }
+        return { status: "error", message: "Failed to fetch leads analytics" }
     }
 }
 
