@@ -18,6 +18,11 @@ export default function LeadCard({ lead, onClick }: { lead: LeadWithId; onClick:
                                 {lead.source.slice(0, 1) + lead.source.slice(1).toLowerCase()}
                             </Badge>
                         )}
+                        {lead.label && (
+                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 shrink-0 ml-1">
+                                {lead.label}
+                            </Badge>
+                        )}
                     </div>
                     {lead.email && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title={lead.email}>

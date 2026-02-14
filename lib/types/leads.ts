@@ -6,6 +6,7 @@ export default interface Lead {
     description: string,
     source: string,
     followUpStage: FollowUpStage,
+    label: string | null,
     createdById?: string,
 }
 

@@ -76,6 +76,7 @@ const leadSchema = z.object({
     ], {
         required_error: "Please select a source.",
     }),
+    label: z.string().optional(),
 })
 
 type LeadFormValues = z.infer<typeof leadSchema>
@@ -113,6 +114,7 @@ export default function LeadDetailDialog({
             mobile: "",
             description: "",
             source: "OTHER",
+            label: "",
         },
     })
 
@@ -126,6 +128,7 @@ export default function LeadDetailDialog({
                 description: lead.description || "",
                 // @ts-ignore - Assuming source matches enum, fallback to OTHER if not
                 source: lead.source as any || "OTHER",
+                label: lead.label || "",
             })
         }
     }, [lead, form])
@@ -347,6 +350,30 @@ export default function LeadDetailDialog({
                                             </FormItem>
                                         )}
                                     />
+                                    <FormField
+                                        control={form.control}
+                                        name="label"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Label</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g. Hot, Warm" {...field} />
+                                                </FormControl>
+                                                <div className="flex gap-2 mt-2 flex-wrap">
+                                                    {["Priority", "First Follow up done", "Second Follow up done"].map((label) => (
+                                                        <span
+                                                            key={label}
+                                                            className="cursor-pointer text-xs px-2 py-1 bg-secondary rounded-md hover:bg-secondary/80 transition-colors"
+                                                            onClick={() => field.onChange(label)}
+                                                        >
+                                                            {label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
                                 <FormField
                                     control={form.control}
@@ -385,6 +412,7 @@ export default function LeadDetailDialog({
                                 <InfoCard icon={<Mail className="w-4 h-4" />} label="Email" value={lead.email} />
                                 <InfoCard icon={<Phone className="w-4 h-4" />} label="Mobile" value={lead.mobile} />
                                 <InfoCard icon={<Globe className="w-4 h-4" />} label="Source" value={lead.source} />
+                                <InfoCard icon={<Hash className="w-4 h-4" />} label="Label" value={lead.label} />
                                 <InfoCard icon={<Hash className="w-4 h-4" />} label="Lead ID" value={lead.id} mono />
                             </div>
 
