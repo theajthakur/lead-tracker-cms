@@ -3,17 +3,20 @@ export default interface Lead {
     email: string,
     mobile: string,
     description: string,
-    source: Source,
+    source: string,
     followUpStage: FollowUpStage,
-    createdById: string,
+    createdById?: string,
 }
 
 export interface UpdateLeadFollowUpStage {
     id: string,
     followUpStage: FollowUpStage,
-    createdById: string,
+    createdById?: string,
 }
 
-export type Source = "OTHER" | "FACEBOOK" | "INSTAGRAM" | "GOOGLE" | "TIKTOK" | "WHATSAPP" | "LINKEDIN" | "TWITTER" | "YOUTUBE" | "OTHER"
+export type FollowUpStage = 1 | 2 | 3
 
-export type FollowUpStage = 1 | 2 | 3 
+export interface LeadWithId extends Lead {
+    id: string;
+    createdAt: Date;
+}

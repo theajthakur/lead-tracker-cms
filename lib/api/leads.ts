@@ -1,6 +1,15 @@
-import { prisma } from "../prisma"
-import Lead, { UpdateLeadFollowUpStage } from "../types/leads"
+"use server"
+import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/prisma"
+import Lead, { UpdateLeadFollowUpStage } from "@/lib/types/leads"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { revalidatePath } from "next/cache";
+
 export const createNewLead = async (data: Lead) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    console.log(session)
+    if (!userId) return { status: "error", message: "User not found" }
     try {
         const lead = await prisma.lead.create({
             data: {
@@ -10,10 +19,11 @@ export const createNewLead = async (data: Lead) => {
                 description: data.description,
                 source: data.source,
                 followUpStage: data.followUpStage,
-                createdById: data.createdById,
+                createdById: userId,
             },
         });
-        return { status: "success", message: "Lead created successfully" }
+        revalidatePath("/leads")
+        return { status: "success", message: "Lead created successfully", data: lead }
     } catch (error) {
         console.log(error)
         return { status: "error", message: "Lead creation failed" }
@@ -21,16 +31,20 @@ export const createNewLead = async (data: Lead) => {
 }
 
 export const updateLeadFollowUpStage = async (data: UpdateLeadFollowUpStage) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
     try {
         const lead = await prisma.lead.update({
             where: {
                 id: data.id,
-                createdById: data.createdById,
+                createdById: userId,
             },
             data: {
                 followUpStage: data.followUpStage,
             },
         });
+        revalidatePath("/leads")
         return { status: "success", message: "Lead updated successfully" }
     } catch (error) {
         console.log(error)
