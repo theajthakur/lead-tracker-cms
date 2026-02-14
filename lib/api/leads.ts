@@ -17,6 +17,7 @@ export const createNewLead = async (data: Lead) => {
                 mobile: data.mobile,
                 description: data.description,
                 source: data.source,
+                label: data.label,
                 followUpStage: data.followUpStage,
                 createdById: userId,
             },
@@ -132,6 +133,7 @@ export const updateLeadContent = async (data: Lead) => {
                 mobile: data.mobile,
                 description: data.description,
                 source: data.source,
+                label: data.label,
                 followUpStage: data.followUpStage,
             },
         });

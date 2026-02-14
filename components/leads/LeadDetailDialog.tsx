@@ -413,7 +413,7 @@ export default function LeadDetailDialog({
                                 <InfoCard icon={<Phone className="w-4 h-4" />} label="Mobile" value={lead.mobile} />
                                 <InfoCard icon={<Globe className="w-4 h-4" />} label="Source" value={lead.source} />
                                 <InfoCard icon={<Hash className="w-4 h-4" />} label="Label" value={lead.label} />
-                                <InfoCard icon={<Hash className="w-4 h-4" />} label="Lead ID" value={lead.id} mono />
+                                <InfoCard icon={<Hash className="w-4 h-4" />} label="Lead ID" value={lead.id} className="col-span-2" />
                             </div>
 
                             <Separator />
@@ -446,14 +446,16 @@ function InfoCard({
     label,
     value,
     mono,
+    className
 }: {
     icon: React.ReactNode
     label: string
     value?: string | null
     mono?: boolean
+    className?: string
 }) {
     return (
-        <div className="rounded-xl flex flex-col border bg-background p-4 shadow-sm hover:shadow-md transition">
+        <div className={`rounded-xl flex flex-col border bg-background p-4 shadow-sm hover:shadow-md transition ${className}`}>
             <div className="flex items-center gap-2">
                 {icon}
                 <p className="text-xs">{label}</p>

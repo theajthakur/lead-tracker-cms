@@ -11,18 +11,20 @@ export default function LeadCard({ lead, onClick }: { lead: LeadWithId; onClick:
         >
             <CardContent className="p-3 flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-col gap-2">
                         <span className="font-semibold text-sm truncate" title={lead.name}>{lead.name}</span>
-                        {lead.source && (
-                            <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5 shrink-0">
-                                {lead.source.slice(0, 1) + lead.source.slice(1).toLowerCase()}
-                            </Badge>
-                        )}
-                        {lead.label && (
-                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 shrink-0 ml-1">
-                                {lead.label}
-                            </Badge>
-                        )}
+                        <div className="flex items-center gap-1">
+                            {lead.source && (
+                                <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5 shrink-0">
+                                    {lead.source.slice(0, 1) + lead.source.slice(1).toLowerCase()}
+                                </Badge>
+                            )}
+                            {lead.label && (
+                                <Badge variant="outline" className="text-[10px] px-1 py-0 h-5 shrink-0 ml-1">
+                                    {lead.label}
+                                </Badge>
+                            )}
+                        </div>
                     </div>
                     {lead.email && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title={lead.email}>
