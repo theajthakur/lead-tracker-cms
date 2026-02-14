@@ -202,7 +202,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex flex-col h-auto md:h-full md:grid md:grid-cols-6 md:divide-x md:divide-border gap-4 md:gap-0 pb-4 md:pb-0 md:px-0 overflow-x-auto min-w-full">
+            <div className="flex flex-col h-auto md:h-full lg:grid lg:grid-cols-6 lg:divide-x lg:divide-border gap-4 md:gap-0 pb-4 md:pb-0 md:px-0 overflow-x-auto min-w-full">
                 {labels.map((stage, i) => (
                     <Column
                         key={stage}

@@ -56,6 +56,7 @@ const leadSchema = z.object({
     ], {
         required_error: "Please select a source.",
     }),
+    label: z.string().optional(),
 })
 
 // Correcting Source enum based on file analysis if needed, but the previous file view showed "WEBSITE" wasn't there but "OTHER" was.
@@ -78,6 +79,7 @@ export function CreateLeadDialog() {
             mobile: "",
             description: "",
             source: "OTHER",
+            label: "",
         },
     })
 
@@ -91,6 +93,7 @@ export function CreateLeadDialog() {
             ...data,
             followUpStage: 1 as const, // 1 = New? Need to check semantics but 1 is safe for now
             description: data.description || "",
+            label: data.label || null,
         }
 
         const result = await createNewLead(payload)
@@ -143,6 +146,30 @@ export function CreateLeadDialog() {
                                     <FormControl>
                                         <Input placeholder="john@example.com" {...field} />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="label"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Label</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. Priority, First Follow up done,Second Follow up done" {...field} />
+                                    </FormControl>
+                                    <div className="flex gap-2 mt-2">
+                                        {["Priority", "First Follow up done", "Second Follow up done"].map((label) => (
+                                            <span
+                                                key={label}
+                                                className="cursor-pointer text-xs px-2 py-1 bg-secondary rounded-md hover:bg-secondary/80 transition-colors"
+                                                onClick={() => field.onChange(label)}
+                                            >
+                                                {label}
+                                            </span>
+                                        ))}
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
