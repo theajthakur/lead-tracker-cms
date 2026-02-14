@@ -13,7 +13,8 @@ import {
     DragOverlay,
     useSensor,
     useSensors,
-    PointerSensor,
+    MouseSensor,
+    TouchSensor,
     KeyboardSensor,
     DragStartEvent,
     DragOverEvent,
@@ -58,9 +59,15 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
     const [activeLead, setActiveLead] = useState<LeadWithId | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
+        useSensor(MouseSensor, {
             activationConstraint: {
-                distance: 8,
+                distance: 10,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
             },
         }),
         useSensor(KeyboardSensor, {
