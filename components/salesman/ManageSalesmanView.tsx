@@ -41,7 +41,7 @@ export default function ManageSalesmanView({ userId, userEmail }: ManageSalesman
             setIsDeleting(false)
         } else {
             toast.success("Salesman deleted successfully")
-            router.replace("/admin/salesman")
+            router.push("/admin/salesman")
         }
         setDeleteDialogOpen(false)
     }
