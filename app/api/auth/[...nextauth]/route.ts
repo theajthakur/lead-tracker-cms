@@ -27,6 +27,10 @@ export const authOptions: NextAuthOptions = {
 
                 if (!user || !user.password) return null
 
+                if (user.status !== "ACTIVE") {
+                    throw new Error("Your account is disabled.")
+                }
+
                 const isValid = await bcrypt.compare(
                     credentials.password,
                     user.password

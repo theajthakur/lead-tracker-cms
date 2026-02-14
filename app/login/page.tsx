@@ -58,7 +58,7 @@ export default function LoginPage() {
             })
 
             if (result?.error) {
-                toast.error("Invalid credentials. Please try again.")
+                toast.error(result.error)
             } else {
                 toast.success("Logged in successfully!")
                 router.push("/")
