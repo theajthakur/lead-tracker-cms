@@ -41,7 +41,8 @@ model Lead {
   description String?
   source      String  @default("OTHER")
 
-  followUpStage Int @default(1)
+  followUpStage Int     @default(1)
+  label         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

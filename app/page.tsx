@@ -6,52 +6,41 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { LeadsPieChart } from "@/components/dashboard/LeadsPieChart"
-import { LeadsLineChart } from "@/components/dashboard/LeadsLineChart"
-import { leadsAnalytics, getRecentLeadsActivity } from "@/lib/api/leads"
+import { LeadsBarChart } from "@/components/dashboard/LeadsBarChart"
+import { leadsAnalytics } from "@/lib/api/leads"
+import { LEAD_STAGES } from "@/lib/types/leads"
 import {
   Users,
-  UserPlus,
-  Clock,
-  CheckCircle2,
-  TrendingUp,
+  FileText,
+  Trophy,
+  XCircle,
 } from "lucide-react"
 
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { prisma } from "@/lib/prisma"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
-  let labels = ["NEW", "PENDING", "FINISHED"]
 
-  if (session?.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { labels: true }
-    })
-    if (user?.labels && user.labels.length === 3) {
-      labels = user.labels
-    }
-  }
-
-  const [analytics, recentActivity] = await Promise.all([
-    leadsAnalytics(),
-    getRecentLeadsActivity()
-  ]);
-
-  const activityData = recentActivity.status === "success" && recentActivity.data ? recentActivity.data : [];
+  const analytics = await leadsAnalytics();
 
   const data = analytics.data || {
     totalLeads: 0,
     stage1: 0,
     stage2: 0,
     stage3: 0,
+    stage4: 0,
+    stage5: 0,
+    stage6: 0,
   }
 
   const chartData = [
-    { name: labels[0], value: data.stage1 },
-    { name: labels[1], value: data.stage2 },
-    { name: labels[2], value: data.stage3 },
+    { name: LEAD_STAGES[0], value: data.stage1 },
+    { name: LEAD_STAGES[1], value: data.stage2 },
+    { name: LEAD_STAGES[2], value: data.stage3 },
+    { name: LEAD_STAGES[3], value: data.stage4 },
+    { name: LEAD_STAGES[4], value: data.stage5 },
+    { name: LEAD_STAGES[5], value: data.stage6 },
   ]
 
   const stats = [
@@ -62,22 +51,22 @@ export default async function DashboardPage() {
       icon: Users,
     },
     {
-      title: `${labels[0]} Leads`,
-      value: data.stage1.toString(),
-      description: `Leads in ${labels[0]} stage`,
-      icon: UserPlus,
+      title: "Quote",
+      value: data.stage4.toString(),
+      description: "Leads in Quote stage",
+      icon: FileText,
     },
     {
-      title: `${labels[1]} Leads`,
-      value: data.stage2.toString(),
-      description: `Leads in ${labels[1]} stage`,
-      icon: Clock,
+      title: "Won",
+      value: data.stage5.toString(),
+      description: "Won leads",
+      icon: Trophy,
     },
     {
-      title: `${labels[2]} Leads`,
-      value: data.stage3.toString(),
-      description: `Leads in ${labels[2]} stage`,
-      icon: CheckCircle2,
+      title: "Lost",
+      value: data.stage6.toString(),
+      description: "Lost leads",
+      icon: XCircle,
     },
   ];
 
@@ -112,20 +101,20 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
         <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Lead Stages Overview</CardTitle>
             <CardDescription>
-              Your recent interactions with leads.
+              Count of leads in each stage.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LeadsLineChart data={activityData} labels={labels} />
+            <LeadsBarChart data={chartData} />
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Performance</CardTitle>
             <CardDescription>
-              Leads wise Statistics
+              Leads distribution statistics
             </CardDescription>
           </CardHeader>
           <CardContent>

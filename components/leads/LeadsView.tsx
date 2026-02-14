@@ -27,7 +27,7 @@ import LeadCard from "./Lead";
 
 interface LeadsViewProps {
     partitions: Record<string, LeadWithId[]>;
-    labels: string[];
+    labels: string[] | readonly string[];
 }
 
 const dropAnimation: DropAnimation = {
@@ -40,7 +40,7 @@ const dropAnimation: DropAnimation = {
     }),
 };
 
-export default function LeadsView({ partitions, labels }: { partitions: Record<string, LeadWithId[]>, labels: string[] }) {
+export default function LeadsView({ partitions, labels }: { partitions: Record<string, LeadWithId[]>, labels: string[] | readonly string[] }) {
     const [leads, setLeads] = useState(partitions);
     const [selectedLead, setSelectedLead] = useState<LeadWithId | null>(null);
 
@@ -179,7 +179,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
         }
 
         const stageIndex = labels.indexOf(overContainer as string);
-        const stage = (stageIndex >= 0 ? stageIndex + 1 : 1) as 1 | 2 | 3;
+        const stage = (stageIndex >= 0 ? stageIndex + 1 : 1) as 1 | 2 | 3 | 4 | 5 | 6;
 
         const result = await updateLeadFollowUpStage({
             id: active.id as string,
@@ -202,7 +202,7 @@ export default function LeadsView({ partitions, labels }: { partitions: Record<s
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex flex-col h-auto md:h-full md:grid md:grid-cols-3 md:divide-x md:divide-border gap-4 md:gap-0 pb-4 md:pb-0 md:px-0">
+            <div className="flex flex-col h-auto md:h-full md:grid md:grid-cols-6 md:divide-x md:divide-border gap-4 md:gap-0 pb-4 md:pb-0 md:px-0 overflow-x-auto min-w-full">
                 {labels.map((stage, i) => (
                     <Column
                         key={stage}

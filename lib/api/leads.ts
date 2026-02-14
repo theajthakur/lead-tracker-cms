@@ -160,6 +160,9 @@ export const leadsAnalytics = async () => {
             stage1: 0,
             stage2: 0,
             stage3: 0,
+            stage4: 0,
+            stage5: 0,
+            stage6: 0,
         };
 
         result.forEach(item => {
@@ -168,6 +171,9 @@ export const leadsAnalytics = async () => {
             if (item.followUpStage === 1) stats.stage1 = item._count.followUpStage;
             if (item.followUpStage === 2) stats.stage2 = item._count.followUpStage;
             if (item.followUpStage === 3) stats.stage3 = item._count.followUpStage;
+            if (item.followUpStage === 4) stats.stage4 = item._count.followUpStage;
+            if (item.followUpStage === 5) stats.stage5 = item._count.followUpStage;
+            if (item.followUpStage === 6) stats.stage6 = item._count.followUpStage;
         });
 
         return { status: "success", data: stats }
