@@ -63,8 +63,8 @@ A comprehensive Content Management System (CMS) designed for efficient lead trac
 1.  **Clone the repository:**
 
     ```bash
-    git clone <repository-url>
-    cd cms
+    git clone https://github.com/theajthakur/lead-tracker-cms
+    cd lead-tracker-cms
     ```
 
 2.  **Install dependencies:**
