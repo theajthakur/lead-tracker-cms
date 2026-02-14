@@ -177,92 +177,99 @@ export default function LeadDetailDialog({
             <DialogContent className="w-[95vw] max-w-xl p-0 overflow-hidden rounded-2xl" showCloseButton={false}>
 
                 {/* Header */}
-                <div className="px-8 py-6 border-b bg-linear-to-b from-muted/40 to-background relative">
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
-                        {!isEditing && (
-                            <>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
-
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-60">
-                                        <div className="grid gap-4">
-                                            <div className="space-y-2">
-                                                <h4 className="font-medium leading-none">Delete Lead?</h4>
-                                                <p className="text-sm text-muted-foreground">
-                                                    This action cannot be undone.
-                                                </p>
-                                            </div>
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={handleDelete}
-                                                    disabled={isDeleting}
-                                                >
-                                                    {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete"}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                            </>
-                        )}
-
-                        {isEditing && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                onClick={() => setIsEditing(false)}
-                            >
-                                <Undo className="h-4 w-4" />
-                            </Button>
-                        )}
-
-                        <DialogClose asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-70 hover:opacity-100">
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </DialogClose>
-                    </div>
-
-                    <DialogHeader className="space-y-3 pr-20"> {/* pr-20 to avoid overlap with buttons */}
+                {/* Header */}
+                <div className="p-4 sm:p-6 border-b bg-linear-to-b from-muted/40 to-background relative">
+                    <DialogHeader className="md:pr-0">
                         <div className="flex items-center justify-between">
-                            <DialogTitle className="text-2xl font-semibold tracking-tight truncate">
+                            <DialogTitle className="text-xl md:text-2xl font-semibold tracking-tight truncate">
                                 {isEditing ? "Edit Lead" : lead.name}
                             </DialogTitle>
                         </div>
 
                         {!isEditing && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Calendar className="h-4 w-4" />
-                                Created{" "}
-                                {lead.createdAt
-                                    ? format(new Date(lead.createdAt), "PPP")
-                                    : "Unknown"}
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Calendar className="h-3.5 w-3.5" />
+                                    Created{" "}
+                                    {lead.createdAt
+                                        ? format(new Date(lead.createdAt), "PPP")
+                                        : "Unknown"}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 gap-2"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">Edit</span>
+                                    </Button>
+
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                                <span className="hidden sm:inline">Delete</span>
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-60" align="end">
+                                            <div className="grid gap-4">
+                                                <div className="space-y-2">
+                                                    <h4 className="font-medium leading-none">Delete Lead?</h4>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        This action cannot be undone.
+                                                    </p>
+                                                </div>
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={handleDelete}
+                                                        disabled={isDeleting}
+                                                    >
+                                                        {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-full"
+                                        onClick={() => onOpenChange(false)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {isEditing && (
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-2"
+                                    onClick={() => setIsEditing(false)}
+                                >
+                                    <Undo className="h-3.5 w-3.5" />
+                                    Cancel
+                                </Button>
                             </div>
                         )}
                     </DialogHeader>
                 </div>
 
                 {/* Body */}
-                <div className="px-8 py-6 max-h-[60vh] overflow-y-auto">
+                <div className="px-4 sm:px-8 py-6 max-h-[60vh] overflow-y-auto">
                     {isEditing ? (
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">

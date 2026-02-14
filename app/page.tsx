@@ -5,7 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { leadsAnalytics } from "@/lib/api/leads"
+import { LeadsPieChart } from "@/components/dashboard/LeadsPieChart"
+import { LeadsLineChart } from "@/components/dashboard/LeadsLineChart"
+import { leadsAnalytics, getRecentLeadsActivity } from "@/lib/api/leads"
 import {
   Users,
   UserPlus,
@@ -14,14 +16,43 @@ import {
   TrendingUp,
 } from "lucide-react"
 
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { prisma } from "@/lib/prisma"
+
 export default async function DashboardPage() {
-  const analytics = await leadsAnalytics()
+  const session = await getServerSession(authOptions)
+  let labels = ["NEW", "PENDING", "FINISHED"]
+
+  if (session?.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { labels: true }
+    })
+    if (user?.labels && user.labels.length === 3) {
+      labels = user.labels
+    }
+  }
+
+  const [analytics, recentActivity] = await Promise.all([
+    leadsAnalytics(),
+    getRecentLeadsActivity()
+  ]);
+
+  const activityData = recentActivity.status === "success" && recentActivity.data ? recentActivity.data : [];
+
   const data = analytics.data || {
     totalLeads: 0,
     stage1: 0,
     stage2: 0,
     stage3: 0,
   }
+
+  const chartData = [
+    { name: labels[0], value: data.stage1 },
+    { name: labels[1], value: data.stage2 },
+    { name: labels[2], value: data.stage3 },
+  ]
 
   const stats = [
     {
@@ -31,21 +62,21 @@ export default async function DashboardPage() {
       icon: Users,
     },
     {
-      title: "New Leads",
+      title: `${labels[0]} Leads`,
       value: data.stage1.toString(),
-      description: "Leads in NEW stage",
+      description: `Leads in ${labels[0]} stage`,
       icon: UserPlus,
     },
     {
-      title: "Pending Follow-ups",
+      title: `${labels[1]} Leads`,
       value: data.stage2.toString(),
-      description: "Leads in PENDING stage",
+      description: `Leads in ${labels[1]} stage`,
       icon: Clock,
     },
     {
-      title: "Converted",
+      title: `${labels[2]} Leads`,
       value: data.stage3.toString(),
-      description: "Leads in FINISHED stage",
+      description: `Leads in ${labels[2]} stage`,
       icon: CheckCircle2,
     },
   ];
@@ -59,7 +90,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -78,8 +109,8 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+        <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>
@@ -87,12 +118,10 @@ export default async function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-              <p>No recent activity to show.</p>
-            </div>
+            <LeadsLineChart data={activityData} labels={labels} />
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Performance</CardTitle>
             <CardDescription>
@@ -100,12 +129,7 @@ export default async function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex h-[200px] items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <TrendingUp className="mx-auto h-10 w-10 opacity-20" />
-                <p className="mt-2 text-sm">Chart Placeholder</p>
-              </div>
-            </div>
+            <LeadsPieChart data={chartData} />
           </CardContent>
         </Card>
       </div>

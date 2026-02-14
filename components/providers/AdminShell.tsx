@@ -89,6 +89,11 @@ const navItems = [
         href: "/leads",
         icon: Users,
     },
+    {
+        title: "Settings",
+        href: "/settings",
+        icon: Settings,
+    },
 ]
 
 import {
@@ -99,7 +104,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronsUpDown, User } from "lucide-react"
+import { ChevronsUpDown, User, Settings } from "lucide-react"
 
 interface SidebarContentProps {
     pathname: string | null

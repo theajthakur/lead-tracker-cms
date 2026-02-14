@@ -22,7 +22,7 @@ export default function Column({
         id: id,
     });
     return (
-        <div ref={setNodeRef} className="flex flex-col gap-4 h-full bg-muted/30 p-2 rounded-lg">
+        <div ref={setNodeRef} className="flex flex-col gap-4 h-auto md:h-full bg-muted/30 p-2 rounded-lg">
             <div className="flex items-center justify-between">
                 <h2 className="font-semibold text-lg pt-2 pl-2">{title}</h2>
                 <Badge variant="secondary">{partition.length}</Badge>

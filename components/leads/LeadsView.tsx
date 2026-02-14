@@ -6,13 +6,7 @@ import Column from "./Column";
 import LeadDetailDialog from "./LeadDetailDialog";
 import { LeadWithId } from "@/lib/types/leads";
 
-interface LeadsViewProps {
-    partitions: {
-        NEW: LeadWithId[];
-        PENDING: LeadWithId[];
-        FINISHED: LeadWithId[];
-    };
-}
+
 
 import {
     DndContext,
@@ -32,11 +26,8 @@ import { updateLeadFollowUpStage } from "@/lib/api/leads";
 import LeadCard from "./Lead";
 
 interface LeadsViewProps {
-    partitions: {
-        NEW: LeadWithId[];
-        PENDING: LeadWithId[];
-        FINISHED: LeadWithId[];
-    };
+    partitions: Record<string, LeadWithId[]>;
+    labels: string[];
 }
 
 const dropAnimation: DropAnimation = {
@@ -49,7 +40,7 @@ const dropAnimation: DropAnimation = {
     }),
 };
 
-export default function LeadsView({ partitions }: LeadsViewProps) {
+export default function LeadsView({ partitions, labels }: { partitions: Record<string, LeadWithId[]>, labels: string[] }) {
     const [leads, setLeads] = useState(partitions);
     const [selectedLead, setSelectedLead] = useState<LeadWithId | null>(null);
 
@@ -187,15 +178,12 @@ export default function LeadsView({ partitions }: LeadsViewProps) {
             }));
         }
 
-        const stageMap: Record<string, 1 | 2 | 3> = {
-            "NEW": 1,
-            "PENDING": 2,
-            "FINISHED": 3
-        }
+        const stageIndex = labels.indexOf(overContainer as string);
+        const stage = (stageIndex >= 0 ? stageIndex + 1 : 1) as 1 | 2 | 3;
 
         const result = await updateLeadFollowUpStage({
             id: active.id as string,
-            followUpStage: stageMap[overContainer as string],
+            followUpStage: stage,
         })
 
         if (result.status === "success") {
@@ -214,13 +202,13 @@ export default function LeadsView({ partitions }: LeadsViewProps) {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            <div className="grid grid-cols-1 md:grid-cols-3 h-full md:divide-x md:divide-border">
-                {["NEW", "PENDING", "FINISHED"].map((stage, i) => (
+            <div className="flex flex-col h-auto md:h-full md:grid md:grid-cols-3 md:divide-x md:divide-border gap-4 md:gap-0 pb-4 md:pb-0 md:px-0">
+                {labels.map((stage, i) => (
                     <Column
                         key={stage}
                         id={stage}
                         title={stage}
-                        partition={leads[stage as keyof typeof leads]}
+                        partition={leads[stage as keyof typeof leads] || []}
                         onLeadClick={handleLeadClick}
                     />
                 ))}

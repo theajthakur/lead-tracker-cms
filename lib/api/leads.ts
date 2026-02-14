@@ -170,3 +170,80 @@ export const leadsAnalytics = async () => {
         return { status: "error", message: "Failed to fetch leads" }
     }
 }
+
+export const updateLeadLabels = async (data: { label: string }[]) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
+
+    if (!Array.isArray(data) || data.length !== 3) {
+        return { status: "error", message: "Exactly 3 labels are required" }
+    }
+
+    try {
+        const labels = data.map(d => d.label);
+        await prisma.user.update({
+            where: { id: userId },
+            data: { labels },
+        });
+        revalidatePath("/leads")
+        return { status: "success", message: "Labels updated successfully" }
+    } catch (error) {
+        console.log(error)
+        return { status: "error", message: "Failed to update labels" }
+    }
+}
+
+export const getRecentLeadsActivity = async () => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    if (!userId) return { status: "error", message: "User not found" }
+
+    try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 6); // Last 7 days including today
+
+        const leads = await prisma.lead.findMany({
+            where: {
+                createdById: userId,
+                createdAt: {
+                    gte: startDate,
+                },
+            },
+            select: {
+                createdAt: true,
+                followUpStage: true,
+            },
+        });
+
+        // Initialize last 7 days with 0 counts
+        const activityMap = new Map<string, { date: string, total: number, stage1: number, stage2: number, stage3: number }>();
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const dateString = date.toLocaleDateString('en-US', { weekday: 'short' }); // e.g., "Mon"
+            // Use ISO string key for sorting/matching but display format for UI
+            const key = date.toISOString().split('T')[0];
+            activityMap.set(key, { date: dateString, total: 0, stage1: 0, stage2: 0, stage3: 0 });
+        }
+
+        leads.forEach(lead => {
+            const key = lead.createdAt.toISOString().split('T')[0];
+            if (activityMap.has(key)) {
+                const entry = activityMap.get(key)!;
+                entry.total += 1;
+                if (lead.followUpStage === 1) entry.stage1 += 1;
+                if (lead.followUpStage === 2) entry.stage2 += 1;
+                if (lead.followUpStage === 3) entry.stage3 += 1;
+            }
+        });
+
+        const data = Array.from(activityMap.values());
+        return { status: "success", data }
+    } catch (error) {
+        console.log(error)
+        return { status: "error", message: "Failed to fetch activity" }
+    }
+}
