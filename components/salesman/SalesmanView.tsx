@@ -19,7 +19,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import CreateSalesmanDialog from "./CreateSalesmanDialog"
-import SalesmanDetailsDialog from "./SalesmanDetailsDialog"
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -52,8 +52,7 @@ interface SalesmanViewProps {
 export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
     const [salesmen, setSalesmen] = useState<Salesman[]>(initialSalesmen)
     const [searchQuery, setSearchQuery] = useState("")
-    const [selectedSalesmanId, setSelectedSalesmanId] = useState<string | null>(null)
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [salesmanToDelete, setSalesmanToDelete] = useState<string | null>(null)
 
@@ -208,11 +207,7 @@ export default function SalesmanView({ initialSalesmen }: SalesmanViewProps) {
                 </CardContent>
             </Card>
 
-            <SalesmanDetailsDialog
-                userId={selectedSalesmanId}
-                open={isDetailsOpen}
-                onOpenChange={setIsDetailsOpen}
-            />
+
 
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>

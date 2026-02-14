@@ -14,6 +14,15 @@ A comprehensive Content Management System (CMS) designed for efficient lead trac
   - Admins can manage user accounts.
   - Activation and deactivation of user access.
 - **Responsive Design**: Fully responsive UI/UX built with Tailwind CSS and Shadcn UI.
+- **Salesman Management**:
+  - View list of all salesmen with key metrics (leads assigned, join date, status).
+  - **Profile View**: Detailed profile page for each salesman.
+  - **Leads View**: Kanban board specific to each salesman's assigned leads.
+  - **Administrative Actions**:
+    - **Add Salesman**: Create new accounts with auto-generated credentials.
+    - **Manage Access**: Deactivate/Activate user accounts.
+    - **Reset Password**: Admin can reset salesman passwords and copy new credentials.
+    - **Delete User**: Permanently remove a salesman and cascade delete their assigned leads.
 
 ## 🛠️ Tech Stack
 
@@ -94,7 +103,23 @@ A comprehensive Content Management System (CMS) designed for efficient lead trac
 
     Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🤝 Contributing
+## 📘 Usage
+ 
+ ### Admin Dashboard
+ 1.  **Login**: Access the admin panel using your credentials.
+ 2.  **Salesman Management**:
+     -   Navigate to the **Salesman** tab to view all team members.
+     -   Click **Add Salesman** to onboard new staff.
+     -   Click on a salesman row to view their **Profile** and **Leads**.
+     -   Use the **Manage** tab within a salesman's profile to **Reset Password** or **Delete User**.
+ 3.  **Lead Analytics**: View real-time charts on the main dashboard to track lead distribution and conversion rates.
+ 
+ ### Salesman Portal
+ 1.  **Lead Tracking**: View assigned leads in a Kanban board.
+ 2.  **Update Status**: Drag and drop leads to update their stage (e.g., from "New" to "Follow Up").
+ 3.  **Lead Details**: Click on a lead card to view and edit detailed information.
+ 
+ ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 

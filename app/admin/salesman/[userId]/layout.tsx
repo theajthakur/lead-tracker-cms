@@ -24,11 +24,11 @@ export default async function SalesmanLayout({ children, params }: LayoutProps) 
     return (
         <div className="flex flex-col h-full space-y-6">
             {/* User Profile Header */}
-            <Card>
+            <Card className="py-2">
                 <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <CardTitle className="text-2xl font-bold">{user.name}</CardTitle>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                        <div className="flex flex-col gap-2">
+                            <CardTitle className="text-2xl font-bold uppercase">{user.name}</CardTitle>
                             <div className="flex items-center gap-2 text-muted-foreground mt-1">
                                 <Badge variant={user.status === "ACTIVE" ? "default" : "destructive"} className="uppercase">
                                     {user.status === "ACTIVE" ? <BadgeCheck className="w-3 h-3 mr-1" /> : <Ban className="w-3 h-3 mr-1" />}
@@ -37,7 +37,7 @@ export default async function SalesmanLayout({ children, params }: LayoutProps) 
                                 <span className="text-sm">Salesman ID: {user.id.slice(0, 8)}...</span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1 text-sm text-muted-foreground">
+                        <div className="flex flex-col items-start gap-2 text-sm text-muted-foreground mt-2 md:mt-0">
                             <div className="flex items-center gap-2">
                                 <Mail className="w-4 h-4" />
                                 {user.email}
